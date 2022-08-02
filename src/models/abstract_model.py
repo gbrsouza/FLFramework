@@ -1,7 +1,12 @@
-import logging
-import os
-
 from abc import abstractmethod
+
+import os
+import logging as log
+
+from src.data.dataset import Dataset
+
+log.basicConfig(level=log.NOTSET)
+logger = log.getLogger("logger")
 
 class Model():
 
@@ -18,9 +23,9 @@ class Model():
         """ save the actual model in the model path """
         if self.model != None:
             self.model.save_weights(self.model_path)
-            logging.info('\t Model saved successfully at %s', self.model_path)
+            logger.info('\t Model saved successfully at %s', self.model_path)
         else:
-            logging.warning('\t No model to be saved')
+            logger.warning('\t No model to be saved')
 
     @abstractmethod
     def evaluate_model(self, data, labels):
@@ -33,7 +38,7 @@ class Model():
         pass
 
     @abstractmethod
-    def train_model(self, data, labels):
+    def train_model(self, dataset: Dataset):
         """train the model with a received dataset
 
         Args:
@@ -42,7 +47,7 @@ class Model():
         """
         pass
 
-    def load_or_create_model(self, data: list, labels: list):
+    def load_or_create_model(self, dataset: Dataset):
         """load a previous saved model, if this model not exists, train a new
         model with the received dataset 
 
@@ -51,14 +56,14 @@ class Model():
             labels (list): a list of labels
         """
         if os.path.exists(self.model_path):
-            logging.info("A pre-trained model was found, loading...")
+            logger.info("A pre-trained model was found, loading...")
             self.create_model()
             self.model.load_weights(self.model_path)
             return self.model
         else:
-            logging.info("No pre-trained model was found, training a new model")
+            logger.info("No pre-trained model was found, training a new model")
             self.create_model()
-            self.train_model(data, labels)
+            self.train_model(dataset)
             self.save_model()
             return self.model
 
