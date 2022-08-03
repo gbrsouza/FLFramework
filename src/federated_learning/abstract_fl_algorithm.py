@@ -7,10 +7,12 @@ class FLAlgorithm():
         pass
 
     @abstractmethod
-    def improve_local_model (self, dataset: Dataset, model: Model):
+    def improve_model (self, sample: Dataset, model: Model, lr=0.1): 
         """This function impplements the local improvement step
 
         Args:
-            dataset (Dataset): The local dataset from client
+            sample (Dataset): The local dataset from client
+            model (Model): The model to improve
+            lr (float): The learning rate to apply in the optimization
         """
         pass

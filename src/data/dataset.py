@@ -30,4 +30,10 @@ class Dataset:
             x_test, y_test = self.data[indices[train_samples:]], self.labels[indices[train_samples:]]
             return (x_train, y_train), (x_test, y_test), (None, None)
 
+    def get_data(self):
+        return self.data
+
+    def get_labels(self):
+        return self.labels
+
     
