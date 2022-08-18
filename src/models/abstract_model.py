@@ -10,8 +10,9 @@ logger = log.getLogger("logger")
 
 class Model():
 
-    def __init__(self, model_path):
+    def __init__(self, model_path, type='binary'):
         self.model_path = model_path
+        self.type = type
         self.model = None
 
     @abstractmethod
@@ -67,6 +68,15 @@ class Model():
             self.save_model()
             return self.model
 
+    @abstractmethod
+    def predict(self, x_test):
+        """predict class from model
+
+        Args:
+            x_test (Array): The test dataset
+        """
+        pass
+
     def get_weights(self):
         """get all weiths from the actual model
 
@@ -75,8 +85,14 @@ class Model():
         """
         return self.model.get_weights()
 
+    def set_weights(self, weights):
+        self.model.set_weights(weights)
+
     def get_model(self):
         return self.model
     
     def set_model(self, model):
         self.model = model
+
+    def get_type(self):
+        return self.type

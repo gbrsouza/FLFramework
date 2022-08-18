@@ -4,9 +4,18 @@ from src.models.cnn import CNN
 from src.actors.server import Server
 from src.actors.client import Client
 from src.federated_learning.fedavg import FedAvg
+from src.federated_learning.fedprox import FedProx
+from src.data.dataset import Dataset
+from src.utils.evaluator import evaluate_model
+
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import precision_score
+from sklearn.metrics import recall_score
 
 import os
 import logging as log
+import numpy as np
 
 log.basicConfig(level=log.NOTSET)
 logger = log.getLogger("logger")
@@ -18,33 +27,46 @@ if __name__ == "__main__":
     reader = FaceReader(face_source, face_labels)
 
     data, labels = reader.read_dataset()
-    logger('labels size: %s; data size: %s ', len(labels), len(data))
-    
+    dataset = Dataset((data, labels))
+    (x_train, y_train), (x_test, y_test), (x_valid, y_valid) = dataset.split_data(train_size=0.90, validation=True)
+    logger.info('labels size: %s; data size: %s ', len(labels), len(data))
+ 
     network_size = 2
     logger.info('simulating FL network with %s clients', network_size)
-    splited_dataset_list = split_to_fl_simulator(data, labels, network_size)
+    splited_dataset_list = split_to_fl_simulator(x_train, y_train, network_size)
 
     # starting models
-    model_path = os.path.abspath('saved_models/cnn/checkpoint')
-    global_model = CNN(model_path)
+    # model_path = os.path.abspath('saved_models/cnn/global-model/checkpoint')
+    global_model = CNN('saved_models/cnn/global-model/checkpoint')
     global_model.create_model()
+    global_model.train_model(Dataset((x_valid, y_valid)))
 
     # starting clients
     clients = [
-        Client(global_model ,splited_dataset_list[0], FedAvg()), 
-        Client(global_model ,splited_dataset_list[1], FedAvg())
+        Client(CNN('saved_models/cnn/client1/checkpoint'), Dataset(splited_dataset_list[0]), FedProx(global_model)), 
+        Client(CNN('saved_models/cnn/client2/checkpoint'), Dataset(splited_dataset_list[1]), FedProx(global_model))
     ]
 
     #using federated leaning
-    cnt = 0
+ 
     models = []
-    for client in clients:
-        logger.info('training client %s', cnt)
-        client.run(5)
+    for step, client in enumerate(clients):
+        logger.info('training client %s', step)
+        client.run(30)
         models.append(client.get_local_model())
-        cnt += 1
+    
+    for step, model in enumerate(models):
+        logger.info('Metrics for client %s', step)
+        acc ,pre, rec, matrix = evaluate_model(x_test, y_test, model)
+        logger.info('acc: %.4f, pre: %.4f, rec: %.4f', acc, pre, rec)
 
     server = Server()
-    new_model = server.aggregate_models(models, global_model)
+    weights = server.aggregate_models(models)
+    global_model.set_weights(weights)
+
+    acc ,pre, rec, matrix = evaluate_model(x_test, y_test, global_model)
+    logger.info('Metrics from aggregated model')
+    logger.info('\n-------confusion matrix-------\n%s', matrix)
+    logger.info('acc: %.4f, pre: %.4f, rec: %.4f', acc, pre, rec)
 
     

@@ -7,6 +7,10 @@ class Dataset:
         self.data = data
         self.labels = labels
 
+    def __init__(self, tuple):
+        self.data = tuple[0]
+        self.labels = tuple[1]
+
     def split_data(self, train_size=0.9, validation=False, shuffle=True):
         size = len(self.data)
         indices = np.arange(size)

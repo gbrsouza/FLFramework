@@ -4,16 +4,18 @@ from tensorflow.keras import layers, models
 
 import tensorflow as tf
 import logging as log
+import numpy as np
 
 log.basicConfig(level=log.NOTSET)
 logger = log.getLogger("logger")
 
 class CNN(Model):
-    def __init__(self, model_path):
-        super().__init__(model_path)
+    def __init__(self, model_path, type='multiclass'):
+        super().__init__(model_path, type)
+        self.create_model()
 
     # overriding abstract method
-    def create_model(self):
+    def create_model(self, to_save=False):
         self.model = models.Sequential()
         self.model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(32, 32, 3)))
         self.model.add(layers.MaxPooling2D((2, 2)))
@@ -29,11 +31,17 @@ class CNN(Model):
                     loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
                     metrics=['accuracy'])
 
-        self.save_model()
+        if to_save:
+            self.save_model()
 
     # overriding abstract method
     def evaluate_model(self, data, labels):
         return self.model.evaluate(data,  labels, verbose=0)
+
+    # overriding abstract method
+    def predict(self, x_test):
+        predict_x=self.model.predict(x_test) 
+        return np.argmax(predict_x,axis=1)
 
     def train_model(self, dataset: Dataset):
         (x_train, y_train), (x_test, y_test), (x_valid, y_valid) = dataset.split_data()

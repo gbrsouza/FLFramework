@@ -1,12 +1,18 @@
 from src.models.abstract_model import Model
 from src.data.dataset import Dataset
 from src.federated_learning.abstract_fl_algorithm import FLAlgorithm
+from src.utils.evaluator import evaluate_model
+from sklearn.metrics import accuracy_score
+from tqdm import tqdm
 
 import logging as log
 import time
 import tensorflow as tf
 from tensorflow import keras
+import numpy as np
 
+
+tf.get_logger().setLevel('ERROR')
 log.basicConfig(level=log.NOTSET)
 logger = log.getLogger("logger")
 
@@ -23,34 +29,30 @@ class Client():
         Args:
             epochs (int): number of epochs
         """
+        
         for epoch in range(epochs):
             logger.info("Starting epoch %s of %s", epoch, epochs)
             start_time = time.time()
             (x_train, y_train), (x_test, y_test), (x_valid, y_valid) = self.local_dataset.split_data()
             data = tf.data.Dataset.from_tensor_slices((x_train, y_train))
             data = data.shuffle(buffer_size=1024).batch(batch_size)
-
+  
             # Iterate over the batches of the dataset.
             actual_model = self.local_model.get_model()
-            for step, (x_batch_train, y_batch_train) in enumerate(data):
-                sample = Dataset(x_batch_train, y_batch_train)
-                actual_model, loss_value = self.improver.improve_model(sample, actual_model)
-
-                # Log every 20 batches.
-                if step % 20 == 0:
-                    logger.info(
-                        "Training loss (for one batch) at step %d: %.4f"
-                        % (step, float(loss_value))
-                    )
-                    logger.info("Seen so far: %d samples" % ((step + 1) * batch_size))
-            
+            for (x_batch_train, y_batch_train) in tqdm(data):
+                actual_model, loss_value = self.improver.improve_model(x_batch_train, y_batch_train, actual_model)
+  
             # update local model
             self.local_model.set_model(actual_model)
             end_time = time.time() 
 
-            loss, acc = self.local_model.evaluate_model(x_test, y_test)
+            # evaluating model 
+            logger.info("Evaluating local model")
+            acc, pre, rec, confu_matrix = evaluate_model(x_test, y_test, self.local_model)
+
+            logger.info('\n-------confusion matrix-------\n%s', confu_matrix)
             logger.info('metrics after epoch %s', epoch)
-            logger.info('loss value: %d, accuracy: %d', loss, acc)
+            logger.info('acc: %.4f, pre: %.4f, rec: %.4f', acc, pre, rec)
             logger.info('Time taken: %.2fs', end_time - start_time)
 
     def get_local_model(self):
