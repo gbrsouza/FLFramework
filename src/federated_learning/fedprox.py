@@ -41,7 +41,7 @@ class FedProx(FLAlgorithm):
 
         # Instantiate an optimizer and loss function.
         optimizer = keras.optimizers.SGD(learning_rate=lr)
-        loss_fn = keras.losses.SparseCategoricalCrossentropy(from_logits=True)
+        loss_fn = keras.losses.SparseCategoricalCrossentropy(from_logits=False)
 
         with tf.GradientTape() as tape:
             logits = model(tensor_data, training=True)

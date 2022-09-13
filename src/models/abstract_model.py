@@ -2,6 +2,7 @@ from abc import abstractmethod
 
 import os
 import logging as log
+import numpy as np
 
 from src.data.dataset import Dataset
 
@@ -68,14 +69,14 @@ class Model():
             self.save_model()
             return self.model
 
-    @abstractmethod
     def predict(self, x_test):
         """predict class from model
 
         Args:
             x_test (Array): The test dataset
         """
-        pass
+        predict_x=self.model.predict(x_test) 
+        return np.argmax(predict_x,axis=1)
 
     def get_weights(self):
         """get all weiths from the actual model
