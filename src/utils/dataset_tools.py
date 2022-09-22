@@ -21,20 +21,21 @@ def encode_single_sample(img_path, ch=3, resize=(128,128)):
         print(e)
         return e
 
-def load_data(image_path, label, size=(150, 150)):
+def load_data(image_path, label, size=(100, 100)):
     image = encode_single_sample(image_path, 3, size)
     return (image, label)
-    
 
-def processing_img(path, label, size=(150, 150)):
+
+def processing_img(path, label, size=(100, 100)):
     img = load_img(path, target_size=size)
     img = img_to_array(img)
     return (img, label)
 
-def processing_image_dataset(data, labels, size=(150,150)):
+def processing_image_dataset(data, labels, size=(100,100)):
     dataset = []
     for elem in data:
-        dataset.append(processing_img(elem, size))
+        (x, y) = load_data(elem, 0, size) 
+        dataset.append(x)
     return np.array(dataset), np.array(labels)
 
 def split_to_fl_simulator (dataset, labels, size):

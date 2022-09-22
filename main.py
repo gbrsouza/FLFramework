@@ -19,21 +19,26 @@ import os
 import logging as log
 import numpy as np
 
+import tensorflow as tf
+
 log.basicConfig(level=log.NOTSET)
 logger = log.getLogger("logger")
 
 if __name__ == "__main__":
-    #MobileNet('saved_models/MobileNet/global-model/checkpoint')
-    # preparing dataset
-    face_source = os.path.abspath('datasource/age-detection/Train')
-    face_labels = os.path.abspath('datasource/age-detection/train.csv')
-    reader = FaceReader(face_source, face_labels)
 
-    data, labels = reader.read_dataset()
-    dataset = Dataset((data, labels))
-    dataset.equalize_data()
-    (x_train, y_train), (x_test, y_test), (x_valid, y_valid) = dataset.split_data(train_size=0.90, validation=True)
-    logger.info('labels size: %s; data size: %s ', len(labels), len(data))
+    print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
+
+    #MobileNet('saved_models/MobileNet/global-model/checkpoint')
+    # # preparing dataset
+    # face_source = os.path.abspath('datasource/age-detection/Train')
+    # face_labels = os.path.abspath('datasource/age-detection/train.csv')
+    # reader = FaceReader(face_source, face_labels)
+
+    # data, labels = reader.read_dataset()
+    # dataset = Dataset((data, labels))
+    # dataset.equalize_data()
+    # (x_train, y_train), (x_test, y_test), (x_valid, y_valid) = dataset.split_data(train_size=0.90, validation=True)
+    # logger.info('labels size: %s; data size: %s ', len(labels), len(data))
  
     # network_size = 2
     # logger.info('simulating FL network with %s clients', network_size)
@@ -41,9 +46,9 @@ if __name__ == "__main__":
 
     # starting models
     #model_path = os.path.abspath('saved_models/vgg16/global-model/checkpoint')
-    global_model = MobileNet('saved_models/MobileNet/global-model/checkpoint')
-    global_model.create_model()
-    global_model.train_model(Dataset((x_valid, y_valid)))
+    # global_model = MobileNet('saved_models/MobileNet/global-model/checkpoint')
+    # global_model.create_model()
+    # global_model.train_model(Dataset((x_valid, y_valid)))
 
     # # # starting clients
     # clients = [

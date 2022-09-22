@@ -16,14 +16,14 @@ class LocalVGG16(Model):
         self.create_model()
 
     # overriding abstract method
-    def create_model(self, to_save=False):
-        base_model = VGG16(weights="imagenet", include_top=False, input_shape=(50,50,3))
+    def create_model(self, input_shape=(32,32,3), num_classes=10, to_save=False):
+        base_model = VGG16(weights="imagenet", include_top=False, input_shape=input_shape)
         base_model.trainable = False
         
         flatten_layer = layers.Flatten()
         dense_layer_1 = layers.Dense(50, activation='relu')
         dense_layer_2 = layers.Dense(20, activation='relu')
-        prediction_layer = layers.Dense(3, activation='softmax')
+        prediction_layer = layers.Dense(num_classes, activation='softmax')
 
         self.model = models.Sequential([
             base_model,
@@ -42,10 +42,10 @@ class LocalVGG16(Model):
         if to_save:
             self.save_model()
 
-    def train_model(self, dataset: Dataset):
+    def train_model(self, dataset: Dataset, epochs=10):
         (x_train, y_train), (x_test, y_test), (x_valid, y_valid) = dataset.split_data()
 
-        self.model.fit(x_train, y_train, epochs=20, 
+        self.model.fit(x_train, y_train, epochs=epochs, 
                     validation_data=(x_test, y_test))
         
         logger.info('Model trainning done')
@@ -54,4 +54,4 @@ class LocalVGG16(Model):
         logger.info('Model accuracy %s', test_acc)
         logger.info('Model loss: %s', test_loss)
 
-        self.save_model()
+        #self.save_model()
