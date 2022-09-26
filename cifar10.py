@@ -32,14 +32,14 @@ if __name__ == "__main__":
     (x_train, y_train), (x_test, y_test), (x_valid, y_valid) = dataset.split_data(train_size=0.80, validation=False)
     # logger.info('labels size: %s; data size: %s ', len(labels), len(data))
 
-    global_model = LocalVGG16("")
+    global_model = CNN("")
     global_model.create_model(input_shape=(32,32,3), num_classes=10)
-    global_model.train_model(Dataset((x_test, y_test)), epochs=5)
+    # global_model.train_model(Dataset((x_test, y_test)), epochs=5)
 
-    logger.info('Metrics for global model')
-    acc ,pre, rec, matrix = evaluate_model(test_images, test_labels, global_model, class_names)
-    logger.info('\n-------confusion matrix-------\n%s', matrix)
-    logger.info('acc: %.4f, pre: %.4f, rec: %.4f', acc, pre, rec)
+    # logger.info('Metrics for global model')
+    # acc ,pre, rec, matrix = evaluate_model(test_images, test_labels, global_model, class_names)
+    # logger.info('\n-------confusion matrix-------\n%s', matrix)
+    # logger.info('acc: %.4f, pre: %.4f, rec: %.4f', acc, pre, rec)
 
     # 4 - Split dataset to simulate clients
     network_size = 2
@@ -48,8 +48,8 @@ if __name__ == "__main__":
 
     # 5 - starting clients
     clients = [
-        Client(CNN('saved_models/cnn/client1/checkpoint'), Dataset(splited_dataset_list[0]), FedProx(global_model)), 
-        Client(CNN('saved_models/cnn/client2/checkpoint'), Dataset(splited_dataset_list[1]), FedProx(global_model))
+        Client(CNN('saved_models/cnn/client1/checkpoint'), Dataset(splited_dataset_list[0]), FedAvg()), 
+        Client(CNN('saved_models/cnn/client2/checkpoint'), Dataset(splited_dataset_list[1]), FedAvg())
     ]
 
     # 6 - using federated leaning
@@ -57,11 +57,12 @@ if __name__ == "__main__":
     models = []
     for step, client in enumerate(clients):
         logger.info('training client %s', step)
-        client.run(2)
+        client.run(80)
         models.append(client.get_local_model())
 
     for step, model in enumerate(models):
         logger.info('Metrics for client %s', step)
+        model.get_model().save('saved_models/weigths/client'+str(step))
         acc ,pre, rec, matrix = evaluate_model(test_images, test_labels, model, class_names)
         logger.info('\n-------confusion matrix-------\n%s', matrix)
         logger.info('acc: %.4f, pre: %.4f, rec: %.4f', acc, pre, rec)

@@ -37,7 +37,7 @@ class FedProx(FLAlgorithm):
         return total_norm
 
     # overriding abstract method
-    def improve_model (self, tensor_data, tensor_labels, model, lr=0.1, mu=0.01): 
+    def improve_model (self, tensor_data, tensor_labels, model, lr=0.001, mu=0.0): 
 
         # Instantiate an optimizer and loss function.
         optimizer = keras.optimizers.SGD(learning_rate=lr)

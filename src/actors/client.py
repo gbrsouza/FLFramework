@@ -25,7 +25,7 @@ class Client():
         self.local_dataset = local_dataset
         self.improver = improver
 
-    def run(self, epochs, batch_size=8):
+    def run(self, epochs, batch_size=32):
         """run the local improvement step
 
         Args:
