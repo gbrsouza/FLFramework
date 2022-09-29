@@ -12,7 +12,7 @@ from tensorflow import keras
 import numpy as np
 import os 
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+# os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
 tf.get_logger().setLevel('ERROR')
 log.basicConfig(level=log.NOTSET)
