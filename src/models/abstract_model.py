@@ -49,6 +49,14 @@ class Model():
         """
         pass
 
+    def load_model(self):
+        """load a previous saved model"""
+        if os.path.exists(self.model_path):
+            logger.info("A pre-trained model was found, loading...")
+            self.model.load_weights(self.model_path)
+        else:
+            self.create_model()
+
     def load_or_create_model(self, dataset: Dataset):
         """load a previous saved model, if this model not exists, train a new
         model with the received dataset 

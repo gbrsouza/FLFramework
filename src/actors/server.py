@@ -32,6 +32,7 @@ class Server():
             # print("model before scalar")
             # print(model.get_weights()[0][0])
             scaled_weights = self.scale_model_weights(model.get_weights(), scalar)
+            #scaled_weights = self.scale_model_weights(model, scalar)
             scaled_local_weight_list.append(scaled_weights)
 
         average_weights = self.sum_scaled_weights(scaled_local_weight_list)

@@ -12,7 +12,7 @@ class FedAvg(FLAlgorithm):
         super().__init__()
 
     # overriding abstract method
-    def improve_model (self, tensor_data, tensor_labels, model, lr=0.1, mu=0.0): 
+    def improve_model (self, tensor_data, tensor_labels, model, lr=0.01, mu=0.0): 
 
         # Instantiate an optimizer and loss function.
         optimizer = keras.optimizers.SGD(learning_rate=lr)

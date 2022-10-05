@@ -1,13 +1,13 @@
 from numpy import average
 from src.models.abstract_model import Model
 
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix, classification_report
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import precision_score
 from sklearn.metrics import recall_score
 
 
-def evaluate_model(x_test, y_test, model:Model):
+def evaluate_model(x_test, y_test, model:Model, classes=None):
     """Evaluate a model using a test dataset
 
     Args:
@@ -22,7 +22,10 @@ def evaluate_model(x_test, y_test, model:Model):
     y_pred = model.predict(x_test)
     matrix = confusion_matrix(y_test, y_pred)
     acc = accuracy_score(y_test, y_pred)
-    
+    if classes != None:
+        clr = classification_report(y_test, y_pred, target_names=classes, digits= 4)
+        print("Classification Report:\n----------------------\n", clr)
+
     if model.get_type() == 'multiclass':
         average = 'macro'
     else:
