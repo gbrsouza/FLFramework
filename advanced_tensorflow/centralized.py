@@ -4,11 +4,11 @@ from tensorflow.keras import layers, models
 import numpy as np
 
 from models import load_model
-
+import time 
 def read_dataset():
 
     train_ds = tf.keras.utils.image_dataset_from_directory(
-        f'./datasource/hospital_detector',
+        f'./datasource/firestation_detector',
         shuffle=True,
         batch_size=None,
         image_size=(64, 64)
@@ -34,7 +34,7 @@ def evaluate(model, x_test, y_test):
 
 
 def main() -> None:
-    model = load_model("vgg16", (64, 64, 3), 2)
+    model = load_model("efinet", (64, 64, 3), 1)
     (x_train, y_train), (x_test, y_test) = read_dataset()
     history = model.fit(
         x_train,
@@ -47,4 +47,7 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    start = time.time()
     main()
+    end = time.time()
+    print("time:", str(end-start))

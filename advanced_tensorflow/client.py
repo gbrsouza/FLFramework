@@ -11,6 +11,8 @@ from datetime import datetime
 import numpy as np
 
 from models import load_model
+import time
+
 
 # Make TensorFlow logs less verbose
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
@@ -27,17 +29,16 @@ class CustomClient(fl.client.NumPyClient):
         self.create_result_file()
 
     def create_result_file(self):
-        row = ["round", "loss", "accuracy"]
+        row = "round & loss & accuracy & precision & time \\\\ \hline \n"
         now = datetime.now()
         postfix = now.strftime('%Y%m%d%H%M')
-        # postfix = datetime.strptime(str(dt), '%Y%m%d%H%M')
+
         file_path = "./results/client0" + str(self.id) + "-" + postfix
 
         self.result_file = file_path
 
         with open(self.result_file, 'w') as f:
-            writer = csv.writer(f)
-            writer.writerow(row)
+            f.write(row)
              
 
     def get_properties(self, config):
@@ -50,7 +51,7 @@ class CustomClient(fl.client.NumPyClient):
 
     def fit(self, parameters, config):
         """Train parameters on the locally held training set."""
-
+        start = time.time()
         # Update local model parameters
         self.model.set_weights(parameters)
 
@@ -76,6 +77,10 @@ class CustomClient(fl.client.NumPyClient):
             "val_loss": history.history["val_loss"][0],
             "val_accuracy": history.history["val_accuracy"][0],
         }
+
+        end = time.time()
+        self.elapse = end - start
+
         return parameters_prime, num_examples_train, results
 
     def evaluate(self, parameters, config):
@@ -88,13 +93,13 @@ class CustomClient(fl.client.NumPyClient):
         steps: int = config["val_steps"]
 
         # Evaluate global model parameters on the local test data and return results
-        loss, accuracy = self.model.evaluate(self.x_test, self.y_test, 32, steps=steps)
+        loss, accuracy, pre = self.model.evaluate(self.x_test, self.y_test, 32, steps=steps)
+
         num_examples_test = len(self.x_test)
 
-        row = [self.round, loss, accuracy]
+        row = str(self.round) + " & " + str(round(loss,3)) + " & " + str(round(accuracy,2)) + " & " + str(round(pre,2)) + " & " + str(round(self.elapse, 0)) + " \\\\ \\hline \n"
         with open(self.result_file, 'a') as f:
-            writer = csv.writer(f)
-            writer.writerow(row)
+            f.write(row)
 
         self.round = self.round + 1
 
@@ -110,7 +115,7 @@ def main() -> None:
     args = parser.parse_args()
 
     # Load and compile Keras model
-    model = load_model("cnn", (64, 64, 3), 2)
+    model = load_model("efinet", (64, 64, 3), 1)
 
     # Load a subset of dataset to simulate the local data partition
     (x_train, y_train), (x_test, y_test) = load_partition(args.partition, args.clients)

@@ -10,11 +10,24 @@ import numpy as np
 
 from models import load_model
 
+import csv
+from datetime import datetime
+import time
+
+now = datetime.now()
+postfix = now.strftime('%Y%m%d%H%M')
+result_file = "./results/server-" + postfix
+
+def create_result_file() -> None:
+    row = "round & loss & accuracy & precision \\\\ \\hline \n"
+    with open(result_file, 'w') as f:
+        f.write(row)
+
 def main() -> None:
     # Load and compile model for
     # 1. server-side parameter initialization
     # 2. server-side parameter evaluation
-    model = load_model("cnn", (64, 64, 3), 2)
+    model = load_model("efinet", (64, 64, 3), 1)
 
     # Create strategy
     strategy = fl.server.strategy.FedAvg(
@@ -32,7 +45,7 @@ def main() -> None:
     # Start Flower server (SSL-enabled) for four rounds of federated learning
     fl.server.start_server(
         server_address="0.0.0.0:8080",
-        config=fl.server.ServerConfig(num_rounds=5),
+        config=fl.server.ServerConfig(num_rounds=8),
         strategy=strategy,
         certificates=(
             Path(".cache/certificates/ca.crt").read_bytes(),
@@ -70,7 +83,12 @@ def get_evaluate_fn(model):
         config: Dict[str, fl.common.Scalar],
     ) -> Optional[Tuple[float, Dict[str, fl.common.Scalar]]]:
         model.set_weights(parameters)  # Update model with the latest parameters
-        loss, accuracy = model.evaluate(x_val, y_val)
+        loss, accuracy, pre = model.evaluate(x_val, y_val)
+
+        row = str(server_round) + " & " + str(round(loss,3)) + " & " + str(round(accuracy,2)) + " & " + str(round(pre, 2)) + " \\\\ \\hline \n"
+        with open(result_file, 'a') as f:
+            f.write(row)
+
         return loss, {"accuracy": accuracy}
 
     return evaluate
@@ -102,4 +120,8 @@ def evaluate_config(server_round: int):
 
 
 if __name__ == "__main__":
+    create_result_file()
+    start = time.time()
     main()
+    end = time.time()
+    print("time:", str(end-start)) 
