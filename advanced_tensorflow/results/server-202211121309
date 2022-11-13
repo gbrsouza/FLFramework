@@ -1,0 +1,7 @@
+round & loss & accuracy & precision \\ \hline 
+0 & 3.189 & 0.43 & 0.44 \\ \hline 
+1 & 0.672 & 0.56 & 0.54 \\ \hline 
+2 & 0.693 & 0.5 & 0.75 \\ \hline 
+3 & 0.693 & 0.5 & 0.0 \\ \hline 
+4 & 0.693 & 0.5 & 0.0 \\ \hline 
+5 & 0.693 & 0.5 & 0.0 \\ \hline 

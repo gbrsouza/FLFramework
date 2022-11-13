@@ -111,11 +111,11 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Flower")
     parser.add_argument("--partition", type=int, choices=range(0, 5), required=True)
     parser.add_argument("--epochs", type=int, choices=range(1, 30), required=True)
-    parser.add_argument("--clients", type=int, choices=range(1, 5), required=True)
+    parser.add_argument("--clients", type=int, choices=range(1, 6), required=True)
     args = parser.parse_args()
 
     # Load and compile Keras model
-    model = load_model("efinet", (64, 64, 3), 1)
+    model = load_model("efinet", (50, 50, 3), 1)
 
     # Load a subset of dataset to simulate the local data partition
     (x_train, y_train), (x_test, y_test) = load_partition(args.partition, args.clients)
@@ -137,33 +137,38 @@ def load_partition(idx: int, clients: int):
     print("CLIENT %s --- Lendo dados para treino", idx)
     # read dataset
     train_ds = tf.keras.utils.image_dataset_from_directory(
-        f'./datasource/firestation_detector',
+        f'./datasource/firestation_detector_seed123/train',
         shuffle=True,
         batch_size=None,
-        image_size=(64, 64)
+        image_size=(50, 50)
+    )
+
+    test_ds = tf.keras.utils.image_dataset_from_directory(
+        f'./datasource/firestation_detector_seed123/test',
+        shuffle=True,
+        batch_size=None,
+        image_size=(50, 50)
     )
 
     print("CLIENT %s --- Fazendo treino", idx)
 
-    test_dataset = train_ds.take(2000) 
-    train_dataset = train_ds.skip(2000)
-
-    x_train, y_train = tuple(zip(*train_dataset))
+    x_train, y_train = tuple(zip(*train_ds))
     x_train, y_train = np.array(x_train), np.array(y_train)
 
-    x_test, y_test = tuple(zip(*test_dataset))
+    x_test, y_test = tuple(zip(*test_ds))
     x_test, y_test = np.array(x_test), np.array(y_test)
 
     s_client_data_train = int(len(x_train)/clients)
-    s_client_data_test = int(len(x_test)/clients)
+    # s_client_data_test = int(len(x_test)/clients)
     #x_test, y_test = tf.keras.datasets.cifar10.load_data()
     
     return (
         x_train[idx * s_client_data_train : (idx + 1) * s_client_data_train],
         y_train[idx * s_client_data_train : (idx + 1) * s_client_data_train],
     ), (
-        x_test[idx * s_client_data_test : (idx + 1) * s_client_data_test],
-        y_test[idx * s_client_data_test : (idx + 1) * s_client_data_test],
+        # x_test[idx * s_client_data_test : (idx + 1) * s_client_data_test],
+        # y_test[idx * s_client_data_test : (idx + 1) * s_client_data_test],
+        x_test, y_test
     )
 
 

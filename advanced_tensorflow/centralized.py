@@ -8,19 +8,23 @@ import time
 def read_dataset():
 
     train_ds = tf.keras.utils.image_dataset_from_directory(
-        f'./datasource/firestation_detector',
+        f'./datasource/firestation_detector_seed123/train',
         shuffle=True,
         batch_size=None,
         image_size=(64, 64)
     )
 
-    test_dataset = train_ds.take(1000) 
-    train_dataset = train_ds.skip(1000)
+    test_ds = tf.keras.utils.image_dataset_from_directory(
+        f'./datasource/firestation_detector_seed123/test',
+        shuffle=True,
+        batch_size=None,
+        image_size=(64, 64)
+    )
 
-    x_train, y_train = tuple(zip(*train_dataset))
+    x_train, y_train = tuple(zip(*train_ds))
     x_train, y_train = np.array(x_train), np.array(y_train)
 
-    x_test, y_test = tuple(zip(*test_dataset))
+    x_test, y_test = tuple(zip(*test_ds))
     x_test, y_test = np.array(x_test), np.array(y_test)
 
     return (x_train, y_train), (x_test, y_test)
@@ -34,7 +38,7 @@ def evaluate(model, x_test, y_test):
 
 
 def main() -> None:
-    model = load_model("efinet", (64, 64, 3), 1)
+    model = load_model("cnn", (64, 64, 3), 1)
     (x_train, y_train), (x_test, y_test) = read_dataset()
     history = model.fit(
         x_train,

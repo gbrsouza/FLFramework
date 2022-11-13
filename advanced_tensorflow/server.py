@@ -27,15 +27,15 @@ def main() -> None:
     # Load and compile model for
     # 1. server-side parameter initialization
     # 2. server-side parameter evaluation
-    model = load_model("efinet", (64, 64, 3), 1)
+    model = load_model("efinet", (50, 50, 3), 1)
 
     # Create strategy
     strategy = fl.server.strategy.FedAvg(
         # fraction_fit=0.3,
         # fraction_evaluate=0.2,
-        min_fit_clients=2,
-        min_evaluate_clients=2,
-        min_available_clients=2,
+        min_fit_clients=5,
+        min_evaluate_clients=5,
+        min_available_clients=5,
         evaluate_fn=get_evaluate_fn(model),
         on_fit_config_fn=fit_config,
         on_evaluate_config_fn=evaluate_config,
@@ -45,7 +45,7 @@ def main() -> None:
     # Start Flower server (SSL-enabled) for four rounds of federated learning
     fl.server.start_server(
         server_address="0.0.0.0:8080",
-        config=fl.server.ServerConfig(num_rounds=8),
+        config=fl.server.ServerConfig(num_rounds=5),
         strategy=strategy,
         certificates=(
             Path(".cache/certificates/ca.crt").read_bytes(),
@@ -63,16 +63,15 @@ def get_evaluate_fn(model):
     # # Use the last 5k training examples as a validation set
     # x_val, y_val = x_train[45000:50000], y_train[45000:50000]
 
-    train_ds = tf.keras.utils.image_dataset_from_directory(
-        f'./datasource/firestation_detector',
+    test_ds = tf.keras.utils.image_dataset_from_directory(
+        f'./datasource/firestation_detector_seed123/test',
         seed=123,
         shuffle=True,
         batch_size=None,
-        image_size=(64, 64)
+        image_size=(50, 50)
     )
 
-    server_dataset = train_ds.take(1000) 
-    x_val, y_val = tuple(zip(*server_dataset))
+    x_val, y_val = tuple(zip(*test_ds))
     x_val = np.array(x_val)
     y_val = np.array(y_val)
 
