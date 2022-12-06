@@ -27,19 +27,25 @@ def main() -> None:
     # Load and compile model for
     # 1. server-side parameter initialization
     # 2. server-side parameter evaluation
-    model = load_model("efinet", (50, 50, 3), 1)
+    model = load_model("efinet", (64, 64, 3), 1)
 
     # Create strategy
-    strategy = fl.server.strategy.FedAvg(
+    strategy = fl.server.strategy.FedAdam(
         # fraction_fit=0.3,
-        # fraction_evaluate=0.2,
-        min_fit_clients=5,
-        min_evaluate_clients=5,
-        min_available_clients=5,
+        # fraction_evaluate=0.2,  
+        min_fit_clients=2,
+        min_evaluate_clients=2,
+        min_available_clients=2,
         evaluate_fn=get_evaluate_fn(model),
         on_fit_config_fn=fit_config,
         on_evaluate_config_fn=evaluate_config,
         initial_parameters=fl.common.ndarrays_to_parameters(model.get_weights()),
+        # server_momentum = 0.9,
+        eta = 1e-2,
+        eta_l = 1e-1,
+        beta_1 = 0.9,
+        beta_2 = 0.99,
+        tau = 1e-3,
     )
 
     # Start Flower server (SSL-enabled) for four rounds of federated learning
@@ -68,7 +74,7 @@ def get_evaluate_fn(model):
         seed=123,
         shuffle=True,
         batch_size=None,
-        image_size=(50, 50)
+        image_size=(64, 64)
     )
 
     x_val, y_val = tuple(zip(*test_ds))
@@ -84,7 +90,7 @@ def get_evaluate_fn(model):
         model.set_weights(parameters)  # Update model with the latest parameters
         loss, accuracy, pre = model.evaluate(x_val, y_val)
 
-        row = str(server_round) + " & " + str(round(loss,3)) + " & " + str(round(accuracy,2)) + " & " + str(round(pre, 2)) + " \\\\ \\hline \n"
+        row = "& " + str(server_round) + " & " + str(round(loss,3)) + " & " + str(round(accuracy,2)) + " & " + str(round(pre, 2)) + " & - \\\\ \n"
         with open(result_file, 'a') as f:
             f.write(row)
 
