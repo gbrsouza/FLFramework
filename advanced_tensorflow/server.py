@@ -14,28 +14,28 @@ import csv
 from datetime import datetime
 import time
 
-now = datetime.now()
-postfix = now.strftime('%Y%m%d%H%M')
-result_file = "./results/server-" + postfix
+# now = datetime.now()
+# postfix = now.strftime('%Y%m%d%H%M')
+result_file = "./results/avg/server-avg-firestation-cnn-fedyogi-5-unb.tex" 
 
 def create_result_file() -> None:
-    row = "round & loss & accuracy & precision \\\\ \\hline \n"
-    with open(result_file, 'w') as f:
-        f.write(row)
+    row = "loss & accuracy & precision \\\\ \\hline \n"
+    # with open(result_file, 'w') as f:
+    #     f.write(row)
 
 def main() -> None:
     # Load and compile model for
     # 1. server-side parameter initialization
     # 2. server-side parameter evaluation
-    model = load_model("efinet", (64, 64, 3), 1)
+    model = load_model("cnn", (45, 45, 3), 1)
 
     # Create strategy
-    strategy = fl.server.strategy.FedAdam(
+    strategy = fl.server.strategy.FedYogi(
         # fraction_fit=0.3,
         # fraction_evaluate=0.2,  
-        min_fit_clients=2,
-        min_evaluate_clients=2,
-        min_available_clients=2,
+        min_fit_clients=5,
+        min_evaluate_clients=5,
+        min_available_clients=5,
         evaluate_fn=get_evaluate_fn(model),
         on_fit_config_fn=fit_config,
         on_evaluate_config_fn=evaluate_config,
@@ -74,7 +74,7 @@ def get_evaluate_fn(model):
         seed=123,
         shuffle=True,
         batch_size=None,
-        image_size=(64, 64)
+        image_size=(45, 45)
     )
 
     x_val, y_val = tuple(zip(*test_ds))
@@ -90,9 +90,10 @@ def get_evaluate_fn(model):
         model.set_weights(parameters)  # Update model with the latest parameters
         loss, accuracy, pre = model.evaluate(x_val, y_val)
 
-        row = "& " + str(server_round) + " & " + str(round(loss,3)) + " & " + str(round(accuracy,2)) + " & " + str(round(pre, 2)) + " & - \\\\ \n"
-        with open(result_file, 'a') as f:
-            f.write(row)
+        if server_round == 5:
+            row = "& " + str(server_round) + " & " + str(round(loss,3)) + " & " + str(round(accuracy,2)) + " & " + str(round(pre, 2)) + " & "
+            with open(result_file, 'a') as f:
+                f.write(row)
 
         return loss, {"accuracy": accuracy}
 
@@ -129,4 +130,8 @@ if __name__ == "__main__":
     start = time.time()
     main()
     end = time.time()
-    print("time:", str(end-start)) 
+    t = str(end-start)
+    print("time:", t) 
+    row = t + " \\\\ \n"
+    with open(result_file, 'a') as f:
+        f.write(row)

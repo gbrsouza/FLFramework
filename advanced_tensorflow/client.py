@@ -37,8 +37,8 @@ class CustomClient(fl.client.NumPyClient):
 
         self.result_file = file_path
 
-        with open(self.result_file, 'w') as f:
-            f.write(row)
+        # with open(self.result_file, 'w') as f:
+        #     f.write(row)
              
 
     def get_properties(self, config):
@@ -99,9 +99,9 @@ class CustomClient(fl.client.NumPyClient):
 
         num_examples_test = len(self.x_test)
 
-        row = " & " + str(self.round) + " & " + str(round(loss,3)) + " & " + str(round(accuracy,2)) + " & " + str(round(pre,2)) + " & " + str(int(self.elapse)) + " \\\\ \n"
-        with open(self.result_file, 'a') as f:
-            f.write(row)
+        # row = " & " + str(self.round) + " & " + str(round(loss,3)) + " & " + str(round(accuracy,2)) + " & " + str(round(pre,2)) + " & " + str(int(self.elapse)) + " \\\\ \n"
+        # with open(self.result_file, 'a') as f:
+        #     f.write(row)
 
         self.round = self.round + 1
 
@@ -117,7 +117,7 @@ def main() -> None:
     args = parser.parse_args()
 
     # Load and compile Keras model
-    model = load_model("efinet", (64, 64, 3), 1)
+    model = load_model("cnn", (45, 45, 3), 1)
 
     # Load a subset of dataset to simulate the local data partition
     (x_train, y_train), (x_test, y_test) = load_partition(args.partition, args.clients)
@@ -142,14 +142,14 @@ def load_partition(idx: int, clients: int):
         f'./datasource/firestation_detector_seed123/train',
         shuffle=True,
         batch_size=None,
-        image_size=(64, 64)
+        image_size=(45, 45)
     )
 
     test_ds = tf.keras.utils.image_dataset_from_directory(
         f'./datasource/firestation_detector_seed123/test',
         shuffle=True,
         batch_size=None,
-        image_size=(64, 64)
+        image_size=(45, 45)
     )
 
     print("CLIENT %s --- Fazendo treino", idx)
@@ -160,41 +160,41 @@ def load_partition(idx: int, clients: int):
     x_test, y_test = tuple(zip(*test_ds))
     x_test, y_test = np.array(x_test), np.array(y_test)
 
-    # s_client_data_train_0 = int(len(x_train)*0.15)
-    # s_client_data_train_1 = int(len(x_train)*0.10)
-    # s_client_data_train_2 = int(len(x_train)*0.20)
-    # s_client_data_train_3 = int(len(x_train)*0.30)
-    # s_client_data_train_4 = int(len(x_train)*0.25)
+    s_client_data_train_0 = int(len(x_train)*0.15)
+    s_client_data_train_1 = int(len(x_train)*0.10)
+    s_client_data_train_2 = int(len(x_train)*0.20)
+    s_client_data_train_3 = int(len(x_train)*0.30)
+    s_client_data_train_4 = int(len(x_train)*0.25)
 
-    s_client_data_train = int(len(x_train)/clients)
+    # s_client_data_train = int(len(x_train)/clients)
   
     # print("----------- data size: ", str(s_client_data_train), " ------------------")
     # s_client_data_test = int(len(x_test)/clients)
     #x_test, y_test = tf.keras.datasets.cifar10.load_data()
     
-    # start = 0
-    # end = s_client_data_train_0
+    start = 0
+    end = s_client_data_train_0
 
-    # if idx == 1:
-    #     start = s_client_data_train_0
-    #     end = s_client_data_train_0 + s_client_data_train_1
-    # elif idx == 2:
-    #     start = s_client_data_train_0 + s_client_data_train_1
-    #     end = s_client_data_train_0 + s_client_data_train_1 + s_client_data_train_2 
-    # elif idx == 3:
-    #     start = s_client_data_train_0 + s_client_data_train_1 + s_client_data_train_2 
-    #     end = s_client_data_train_0 + s_client_data_train_1 + s_client_data_train_2 + s_client_data_train_3
-    # elif idx == 4:
-    #     start = s_client_data_train_0 + s_client_data_train_1 + s_client_data_train_2 + s_client_data_train_3
-    #     end = len(x_train)
+    if idx == 1:
+        start = s_client_data_train_0
+        end = s_client_data_train_0 + s_client_data_train_1
+    elif idx == 2:
+        start = s_client_data_train_0 + s_client_data_train_1
+        end = s_client_data_train_0 + s_client_data_train_1 + s_client_data_train_2 
+    elif idx == 3:
+        start = s_client_data_train_0 + s_client_data_train_1 + s_client_data_train_2 
+        end = s_client_data_train_0 + s_client_data_train_1 + s_client_data_train_2 + s_client_data_train_3
+    elif idx == 4:
+        start = s_client_data_train_0 + s_client_data_train_1 + s_client_data_train_2 + s_client_data_train_3
+        end = len(x_train)
 
-    # print("Start: ", start, "End: ", end)
+    print("Start: ", start, "End: ", end)
 
     return (
-        # x_train[start : end],
-        # y_train[start : end],
-        x_train[idx * s_client_data_train : (idx + 1) * s_client_data_train],
-        y_train[idx * s_client_data_train : (idx + 1) * s_client_data_train],
+        x_train[start : end],
+        y_train[start : end],
+        # x_train[idx * s_client_data_train : (idx + 1) * s_client_data_train],
+        # y_train[idx * s_client_data_train : (idx + 1) * s_client_data_train],
     ), (
         # x_test[idx * s_client_data_test : (idx + 1) * s_client_data_test],
         # y_test[idx * s_client_data_test : (idx + 1) * s_client_data_test],
