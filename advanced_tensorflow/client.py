@@ -117,7 +117,7 @@ def main() -> None:
     args = parser.parse_args()
 
     # Load and compile Keras model
-    model = load_model("cnn", (45, 45, 3), 1)
+    model = load_model("efinet", (45, 45, 3), 1)
 
     # Load a subset of dataset to simulate the local data partition
     (x_train, y_train), (x_test, y_test) = load_partition(args.partition, args.clients)
