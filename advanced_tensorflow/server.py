@@ -16,7 +16,7 @@ import time
 
 # now = datetime.now()
 # postfix = now.strftime('%Y%m%d%H%M')
-result_file = "./results/avg/server-avg-firestation-efinet-fedyogi-5-unb.tex" 
+result_file = "./results/avg/hospital_balanced/server-avg-hospital-vgg16-fedadam-5-balanced.tex" 
 
 def create_result_file() -> None:
     row = "loss & accuracy & precision \\\\ \\hline \n"
@@ -27,10 +27,10 @@ def main() -> None:
     # Load and compile model for
     # 1. server-side parameter initialization
     # 2. server-side parameter evaluation
-    model = load_model("efinet", (45, 45, 3), 1)
+    model = load_model("vgg16", (45, 45, 3), 1)
 
     # Create strategy
-    strategy = fl.server.strategy.FedYogi(
+    strategy = fl.server.strategy.FedAdam(
         # fraction_fit=0.3,
         # fraction_evaluate=0.2,  
         min_fit_clients=5, 
@@ -70,7 +70,7 @@ def get_evaluate_fn(model):
     # x_val, y_val = x_train[45000:50000], y_train[45000:50000]
 
     test_ds = tf.keras.utils.image_dataset_from_directory(
-        f'./datasource/firestation_detector_seed123/test',
+        f'./datasource/hospital_detector_seed123/test',
         seed=123,
         shuffle=True,
         batch_size=None,

@@ -5,20 +5,24 @@ import numpy as np
 
 from models import load_model
 import time 
+
+
+result_file = "./results/avg/hospital_unb/server-avg-hospital-efinet-centralized-5-unb.tex" 
+
 def read_dataset():
 
     train_ds = tf.keras.utils.image_dataset_from_directory(
-        f'./datasource/firestation_detector_seed123/train',
+        f'./datasource/hospital_detector_seed123/train',
         shuffle=True,
         batch_size=None,
-        image_size=(64, 64)
+        image_size=(45, 45)
     )
 
     test_ds = tf.keras.utils.image_dataset_from_directory(
-        f'./datasource/firestation_detector_seed123/test',
+        f'./datasource/hospital_detector_seed123/test',
         shuffle=True,
         batch_size=None,
-        image_size=(64, 64)
+        image_size=(45, 45)
     )
 
     x_train, y_train = tuple(zip(*train_ds))
@@ -33,12 +37,14 @@ def evaluate(model, x_test, y_test):
 
     # Evaluate the model on the test data using `evaluate`
     print("Evaluate on test data")
-    results = model.evaluate(x_test, y_test, batch_size=128)
-    print("test loss, test acc:", results)
+    loss, acc, pre = model.evaluate(x_test, y_test, batch_size=128)
+    row = "& " + str(5) + " & " + str(round(loss,3)) + " & " + str(round(acc,2)) + " & " + str(round(pre, 2)) + " & "
+    with open(result_file, 'a') as f:
+        f.write(row)
 
 
 def main() -> None:
-    model = load_model("cnn", (64, 64, 3), 1)
+    model = load_model("efinet", (45, 45, 3), 1)
     (x_train, y_train), (x_test, y_test) = read_dataset()
     history = model.fit(
         x_train,
@@ -51,7 +57,11 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    start = time.time()
-    main()
-    end = time.time()
-    print("time:", str(end-start))
+    for i in range(10):
+        start = time.time()
+        main()
+        end = time.time()
+        t = str(end-start)
+        row = t + " \\\\ \n"
+        with open(result_file, 'a') as f:
+            f.write(row)
