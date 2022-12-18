@@ -16,7 +16,7 @@ import time
 
 # now = datetime.now()
 # postfix = now.strftime('%Y%m%d%H%M')
-result_file = "./results/avg/hospital_balanced/server-avg-hospital-vgg16-fedadam-5-balanced.tex" 
+result_file = "./results/avg/firestation_balanced/server-avg-firestation-cnn-qfedavg-5-balanced.tex" 
 
 def create_result_file() -> None:
     row = "loss & accuracy & precision \\\\ \\hline \n"
@@ -27,10 +27,10 @@ def main() -> None:
     # Load and compile model for
     # 1. server-side parameter initialization
     # 2. server-side parameter evaluation
-    model = load_model("vgg16", (45, 45, 3), 1)
+    model = load_model("cnn", (45, 45, 3), 1)
 
     # Create strategy
-    strategy = fl.server.strategy.FedAdam(
+    strategy = fl.server.strategy.QFedAvg(
         # fraction_fit=0.3,
         # fraction_evaluate=0.2,  
         min_fit_clients=5, 
@@ -41,11 +41,11 @@ def main() -> None:
         on_evaluate_config_fn=evaluate_config,
         initial_parameters=fl.common.ndarrays_to_parameters(model.get_weights()),
         # server_momentum = 0.9,
-        eta = 1e-2,
-        eta_l = 1e-1,
-        beta_1 = 0.9,
-        beta_2 = 0.99,
-        tau = 1e-3,
+        # eta = 1e-2,
+        # eta_l = 1e-1,
+        # beta_1 = 0.9,
+        # beta_2 = 0.99,
+        # tau = 1e-3,
     )
 
     # Start Flower server (SSL-enabled) for four rounds of federated learning
@@ -70,7 +70,7 @@ def get_evaluate_fn(model):
     # x_val, y_val = x_train[45000:50000], y_train[45000:50000]
 
     test_ds = tf.keras.utils.image_dataset_from_directory(
-        f'./datasource/hospital_detector_seed123/test',
+        f'./datasource/firestation_detector_seed123/test',
         seed=123,
         shuffle=True,
         batch_size=None,
