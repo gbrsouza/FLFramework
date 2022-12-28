@@ -10,9 +10,9 @@ for j in `seq 0 9`; do
     # Ensure that the Keras dataset used in client.py is already cached.
     python -c "import tensorflow as tf; tf.keras.datasets.cifar10.load_data()"
 
-    for i in `seq 0 4`; do
+    for i in `seq 0 1`; do
         echo "Starting client $i"
-        python client.py --partition=${i} --epochs=15 --clients=5 &
+        python client.py --partition=${i} --epochs=15 --clients=2 &
     done
 
     # This will allow you to use CTRL+C to stop all background processes

@@ -3,7 +3,7 @@ from statistics import mean, stdev
 import re
 from scipy import stats
 
-RESULTS_PATH = "./results/avg/hospital_unb/"
+RESULTS_PATH = "./results/avg/firestation_balanced/"
 
 def read_results(filepath):
     file = open(filepath, 'r')
@@ -103,10 +103,18 @@ def main() -> None:
     # print('fedyogi', result_yogi)
 
     # calculate metrics 
-    m_fedavg = metrics(centralized)
+    m_fedavg = metrics(fedyogi)
+    m_fedavgm = metrics(fedavgm)
+    m_qfedavg = metrics(qfedavg)
+    m_fedadam = metrics(fedadam)
+    m_fedyogi = metrics(fedyogi)
 
-    print_result(m_fedavg)
-    # print_mean(m_fedavg)
+    # print_result(m_fedavg)
+    print_mean(m_fedavg)
+    print_mean(m_fedavgm)
+    print_mean(m_qfedavg)
+    print_mean(m_fedadam)
+    print_mean(m_fedyogi)
 
     # Conduct the Kruskal-Wallis Test 
     # result = stats.kruskal(

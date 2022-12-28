@@ -117,7 +117,7 @@ def main() -> None:
     args = parser.parse_args()
 
     # Load and compile Keras model
-    model = load_model("cnn", (45, 45, 3), 1)
+    model = load_model("efinet", (45, 45, 3), 1)
 
     # Load a subset of dataset to simulate the local data partition
     (x_train, y_train), (x_test, y_test) = load_partition(args.partition, args.clients)
@@ -139,14 +139,14 @@ def load_partition(idx: int, clients: int):
     print("CLIENT %s --- Lendo dados para treino", idx)
     # read dataset
     train_ds = tf.keras.utils.image_dataset_from_directory(
-        f'./datasource/firestation_detector_seed123/train',
+        f'./datasource/hospital_detector_seed123/train',
         shuffle=True,
         batch_size=None,
         image_size=(45, 45)
     )
 
     test_ds = tf.keras.utils.image_dataset_from_directory(
-        f'./datasource/firestation_detector_seed123/test',
+        f'./datasource/hospital_detector_seed123/test',
         shuffle=True,
         batch_size=None,
         image_size=(45, 45)
