@@ -1,0 +1,26 @@
+version: "3"
+
+  services:
+
+    client_service:
+
+      image: "client_federated_learning:0.1"
+
+      ports: 
+        - 80:8088
+
+      depends_on:
+
+        - server_service
+
+    server_service:
+
+      image: "server_federated_learning:0.1"
+
+      ports: 
+        - 80:8088
+
+      depends_on:
+
+        - server_service
+        

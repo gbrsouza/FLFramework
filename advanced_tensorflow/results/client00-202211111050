@@ -1,0 +1,3 @@
+round & loss & accuracy & precision & time \\ \hline 
+0 & 3.459 & 0.46 & 0.41 & 405.0 \\ \hline 
+1 & 0.691 & 0.55 & 0.0 & 403.0 \\ \hline 

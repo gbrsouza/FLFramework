@@ -1,5 +1,8 @@
 import numpy as np
+import logging as log
 
+log.basicConfig(level=log.NOTSET)
+logger = log.getLogger("logger")
 
 class Dataset:
     
@@ -23,6 +26,8 @@ class Dataset:
             
             train_samples = int(size * train_size)
             test_sample = train_samples + int(size * test_validation_size)
+            # print(type(indices))
+            # print(indices[:10])
 
             x_train, y_train = self.data[indices[:train_samples]], self.labels[indices[:train_samples]]
             x_test, y_test = self.data[indices[train_samples:test_sample]], self.labels[indices[train_samples:test_sample]]
@@ -33,6 +38,39 @@ class Dataset:
             x_train, y_train = self.data[indices[:train_samples]], self.labels[indices[:train_samples]]
             x_test, y_test = self.data[indices[train_samples:]], self.labels[indices[train_samples:]]
             return (x_train, y_train), (x_test, y_test), (None, None)
+
+    def equalize_data(self):
+        unique, counts = np.unique(self.labels, return_counts=True)
+        result = np.column_stack((unique, counts)) 
+        logger.info('classes count before balancing dataset')
+        print(result)
+
+        class_size = min(counts)
+        # separe classes
+        mapped_indices = {}
+        for label in unique:
+            mapped_indices[label] = []
+
+        for ind, label in enumerate(self.labels):
+            mapped_indices[label[0]].append(ind)
+
+        X_under, y_under = [], []
+        for label in unique:
+            indices = mapped_indices[label]
+            np.random.shuffle(indices)
+
+            x, y = self.data[indices[:class_size]], self.labels[indices[:class_size]]
+            X_under.extend(x)
+            y_under.extend(y)
+
+        unique, counts = np.unique(y_under, return_counts=True)
+        result = np.column_stack((unique, counts)) 
+        logger.info('classes count after balancing dataset')
+        print(result)
+        print(len(X_under))
+
+        self.data = np.array(X_under)
+        self.labels = np.array(y_under)
 
     def get_data(self):
         return self.data

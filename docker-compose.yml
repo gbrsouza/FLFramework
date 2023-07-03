@@ -1,0 +1,14 @@
+services:
+  flframework:
+    image: fl-freamwork:0.1
+    container_name: flframework
+    hostname: flframework-deploy
+    expose:
+      - "5454"
+    ports:
+      - "5454:5454"
+    environment:
+      CLIENTS: 2
+      ALGORITHM: FedAvg
+    stdin_open: true
+    tty: true

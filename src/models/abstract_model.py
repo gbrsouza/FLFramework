@@ -2,6 +2,7 @@ from abc import abstractmethod
 
 import os
 import logging as log
+import numpy as np
 
 from src.data.dataset import Dataset
 
@@ -48,6 +49,14 @@ class Model():
         """
         pass
 
+    def load_model(self):
+        """load a previous saved model"""
+        if os.path.exists(self.model_path):
+            logger.info("A pre-trained model was found, loading...")
+            self.model.load_weights(self.model_path)
+        else:
+            self.create_model()
+
     def load_or_create_model(self, dataset: Dataset):
         """load a previous saved model, if this model not exists, train a new
         model with the received dataset 
@@ -68,14 +77,14 @@ class Model():
             self.save_model()
             return self.model
 
-    @abstractmethod
     def predict(self, x_test):
         """predict class from model
 
         Args:
             x_test (Array): The test dataset
         """
-        pass
+        predict_x=self.model.predict(x_test) 
+        return np.argmax(predict_x,axis=1)
 
     def get_weights(self):
         """get all weiths from the actual model

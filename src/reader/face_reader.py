@@ -55,7 +55,7 @@ class FaceReader(Reader):
 
         # read images paths to tensorflow format
         logger.info("classes names %s", DATASET_CLASSES_NAMES.values)
-        images = np.array([encode_single_sample(x) for x in dataset])
+        images = np.array(dataset)
         labels = np.array([DATASET_CLASSES_NAMES[x] for x in labels])
 
         return images, labels

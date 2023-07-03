@@ -3,14 +3,16 @@ from src.data.dataset import Dataset
 from src.federated_learning.abstract_fl_algorithm import FLAlgorithm
 from src.utils.evaluator import evaluate_model
 from sklearn.metrics import accuracy_score
-from tqdm import tqdm
+from src.utils.dataset_tools import processing_image_dataset
 
 import logging as log
 import time
 import tensorflow as tf
 from tensorflow import keras
 import numpy as np
+import os 
 
+# os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
 tf.get_logger().setLevel('ERROR')
 log.basicConfig(level=log.NOTSET)
@@ -23,7 +25,7 @@ class Client():
         self.local_dataset = local_dataset
         self.improver = improver
 
-    def run(self, epochs, batch_size=64):
+    def run(self, epochs, batch_size=32):
         """run the local improvement step
 
         Args:
@@ -39,7 +41,8 @@ class Client():
   
             # Iterate over the batches of the dataset.
             actual_model = self.local_model.get_model()
-            for (x_batch_train, y_batch_train) in tqdm(data):
+            for (x_batch_train, y_batch_train) in data:
+                #x_batch_train, y_batch_train = processing_image_dataset(x_batch_train, y_batch_train, (100,100))
                 actual_model, loss_value = self.improver.improve_model(x_batch_train, y_batch_train, actual_model)
   
             # update local model
@@ -48,6 +51,7 @@ class Client():
 
             # evaluating model 
             logger.info("Evaluating local model")
+            #x_test, y_test = processing_image_dataset(x_test, y_test, (100,100))
             acc, pre, rec, confu_matrix = evaluate_model(x_test, y_test, self.local_model)
 
             logger.info('\n-------confusion matrix-------\n%s', confu_matrix)
